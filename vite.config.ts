@@ -35,7 +35,7 @@ export default defineConfig({
 			plugins: [preserveUseClientDirective],
 			external: (id) => {
 				return /^(react|react-dom|react\/jsx-runtime|react\/jsx-dev-runtime)$/.test(
-					id,
+					id
 				);
 			},
 			output: {
@@ -52,9 +52,8 @@ export default defineConfig({
 		minify: "terser",
 		terserOptions: {
 			compress: {
-				drop_console: true,
+				drop_console: ["log", "info", "debug"],
 				drop_debugger: true,
-				pure_funcs: ["console.log", "console.info", "console.debug"],
 			},
 			mangle: {
 				safari10: true,
