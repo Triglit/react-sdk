@@ -39,7 +39,8 @@
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
 		"format": "biome format --write",
-		"lint": "biome check --unsafe --fix"
+		"lint": "biome check --unsafe --fix",
+		"commit": "git cz"
 	},
 	"dependencies": {
 		"@base-ui-components/react": "1.0.0-beta.4",
@@ -85,4 +86,3 @@
 		}
 	}
 }
-
