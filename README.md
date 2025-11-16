@@ -2,7 +2,9 @@
 
 > Componentes React prontos para uso e hooks para gerenciamento de estado
 
-O React SDK (`@triglit/react-sdk`) fornece componentes React prontos para uso e hooks otimizados para construir interfaces de gerenciamento de workflows. Ele inclui um editor visual completo de workflows, componentes de UI estilizados e suporte completo a TypeScript e i18n.
+O React SDK (`@triglit/react-sdk`) fornece componentes React prontos para uso e hooks otimizados para construir interfaces de gerenciamento de workflows. Ele inclui um editor visual completo de workflows, componentes de UI estilizados e suporte completo a TypeScript e i18n.  
+
+Confira a documentação oficial em [docs.triglit.com](https://docs.triglit.com/sdks/react-sdk).
 
 ## 📦 Instalação
 
