@@ -35,7 +35,7 @@ export default defineConfig({
 			plugins: [preserveUseClientDirective],
 			external: (id) => {
 				return /^(react|react-dom|react\/jsx-runtime|react\/jsx-dev-runtime)$/.test(
-					id
+					id,
 				);
 			},
 			output: {

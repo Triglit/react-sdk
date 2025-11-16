@@ -1,7 +1,7 @@
 {
 	"name": "@triglit/react-sdk",
 	"type": "module",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "React SDK for Triglit",
 	"author": "João Pedro <contato@triglit.com>",
 	"license": "MIT",
@@ -51,7 +51,7 @@
 		"lucide-react": "^0.553.0",
 		"motion": "^12.23.24",
 		"tailwind-merge": "^3.4.0",
-		"triglit": "^0.2.0"
+		"triglit": "0.3.0"
 	},
 	"peerDependencies": {
 		"react": "^18 || ^19",
@@ -87,4 +87,3 @@
 		}
 	}
 }
-

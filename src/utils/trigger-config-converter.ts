@@ -14,9 +14,6 @@ export function convertTriggerConfigToApi(
 	triggerType: string,
 	visualConfig: Record<string, unknown>,
 ): {
-	filters?: Record<string, unknown>;
-	entityIdResolver?: string;
-	eventKeyGenerator?: string;
 	rateLimit?: {
 		maxRequests: number;
 		windowMs: number;
@@ -27,16 +24,13 @@ export function convertTriggerConfigToApi(
 		backoffMs: number;
 		maxBackoffMs: number;
 	};
-	webhookConfig?: null;
+	webhookConfig?: {
+		event?: string;
+	} | null;
 	scheduleConfig?: {
 		cron?: string;
 		intervalMs?: number;
 		timezone?: string;
-	};
-	queueConfig?: {
-		queueName: string;
-		consumerGroup?: string;
-		batchSize?: number;
 	};
 } {
 	const type = triggerType.replace("trigger_", "") as TriggerType;
@@ -48,9 +42,6 @@ export function convertTriggerConfigToApi(
 	delete config._triggerId;
 
 	const apiConfig: {
-		filters?: Record<string, unknown>;
-		entityIdResolver?: string;
-		eventKeyGenerator?: string;
 		rateLimit?: { maxRequests: number; windowMs: number };
 		timeoutMs?: number;
 		retryPolicy?: {
@@ -58,27 +49,17 @@ export function convertTriggerConfigToApi(
 			backoffMs: number;
 			maxBackoffMs: number;
 		};
-		webhookConfig?: null;
+		webhookConfig?: {
+			event?: string;
+		} | null;
 		scheduleConfig?: {
 			cron?: string;
 			intervalMs?: number;
 			timezone?: string;
 		};
-		queueConfig?: {
-			queueName: string;
-			consumerGroup?: string;
-			batchSize?: number;
-		};
 	} = {};
 
 	// Mapeamento específico por tipo de trigger
-	if (type === "event") {
-		if (config.eventType) {
-			apiConfig.filters =
-				(config.filters as Record<string, unknown>) || {};
-		}
-	}
-
 	if (type === "schedule") {
 		apiConfig.scheduleConfig = {
 			cron: (config.cronExpression as string) || undefined,
@@ -87,25 +68,11 @@ export function convertTriggerConfigToApi(
 	}
 
 	if (type === "webhook") {
-		// Para webhook, apenas marca como null conforme o schema
+		// Para webhook, inclui o event se fornecido
 		// Os campos path, method, requireAuth são apenas visuais e não são salvos no config da API
-		apiConfig.webhookConfig = null;
-	}
-
-	if (type === "queue") {
-		apiConfig.queueConfig = {
-			queueName: (config.queueName as string) || "",
-			consumerGroup: (config.consumerGroup as string) || undefined,
-			batchSize: (config.batchSize as number) || undefined,
-		};
-	}
-
-	// Campos comuns opcionais
-	if (config.entityIdResolver) {
-		apiConfig.entityIdResolver = config.entityIdResolver as string;
-	}
-	if (config.eventKeyGenerator) {
-		apiConfig.eventKeyGenerator = config.eventKeyGenerator as string;
+		apiConfig.webhookConfig = config.event
+			? { event: config.event as string }
+			: null;
 	}
 	if (config.rateLimit) {
 		apiConfig.rateLimit = config.rateLimit as {
@@ -129,31 +96,33 @@ export function convertTriggerConfigToApi(
 
 /**
  * Get trigger configuration schemas for the editor
+ * @param webhookEvents - Optional list of custom webhook events configured for the tenant
  */
-export function getTriggerConfigSchemas(): Record<
-	string,
-	Record<string, unknown>
-> {
+export function getTriggerConfigSchemas(
+	webhookEvents?: Array<{ name: string; label: string }>,
+): Record<string, Record<string, unknown>> {
+	const webhookEventField =
+		webhookEvents && webhookEvents.length > 0
+			? {
+					event: {
+						type: "string",
+						title: "Event",
+						description:
+							"Event associated with this webhook trigger",
+						enum: webhookEvents.map((e) => e.name),
+						enumNames: webhookEvents.map((e) => e.label),
+					},
+				}
+			: {
+					event: {
+						type: "string",
+						title: "Event",
+						description:
+							"Event associated with this webhook trigger (e.g., lead.created)",
+					},
+				};
+
 	return {
-		trigger_event: {
-			type: "object",
-			properties: {
-				eventType: {
-					type: "string",
-					title: "Event Type",
-					description:
-						"Name of the event that will trigger this workflow",
-					default: "",
-				},
-				filters: {
-					type: "object",
-					title: "Filters",
-					description: "Conditions the event must meet (JSON)",
-					default: {},
-				},
-			},
-			required: ["eventType"],
-		},
 		trigger_schedule: {
 			type: "object",
 			properties: {
@@ -176,56 +145,9 @@ export function getTriggerConfigSchemas(): Record<
 		trigger_webhook: {
 			type: "object",
 			properties: {
-				path: {
-					type: "string",
-					title: "Webhook Path",
-					description: "Webhook URL path (e.g., /my-webhook)",
-					default: "",
-				},
-				method: {
-					type: "string",
-					title: "HTTP Method",
-					description: "Accepted HTTP method",
-					enum: ["POST", "GET", "PUT", "DELETE"],
-					default: "POST",
-				},
-				requireAuth: {
-					type: "boolean",
-					title: "Require Authentication",
-					description:
-						"If true, the webhook requires authentication via API key",
-					default: true,
-				},
+				...webhookEventField,
 			},
-			required: ["path", "method"],
-		},
-		trigger_queue: {
-			type: "object",
-			properties: {
-				queueName: {
-					type: "string",
-					title: "Queue Name",
-					description:
-						"Name of the queue that will trigger this workflow",
-					default: "",
-				},
-				maxRetries: {
-					type: "integer",
-					title: "Max Retries",
-					description: "Maximum number of retries on failure",
-					default: 3,
-					minimum: 0,
-					maximum: 10,
-				},
-				priority: {
-					type: "string",
-					title: "Priority",
-					description: "Queue processing priority",
-					enum: ["low", "normal", "high"],
-					default: "normal",
-				},
-			},
-			required: ["queueName"],
+			required: [],
 		},
 	};
 }

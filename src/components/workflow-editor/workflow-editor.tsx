@@ -486,11 +486,7 @@ export function WorkflowEditor({
 						const newTrigger = (await createTriggerAsync({
 							workflowVersionId: savedVersionId,
 							name: triggerName,
-							type: triggerType as
-								| "event"
-								| "schedule"
-								| "webhook"
-								| "queue",
+							type: triggerType as "schedule" | "webhook",
 							config: apiConfig,
 						})) as Trigger;
 
@@ -754,12 +750,7 @@ export function WorkflowEditor({
 									{t("workflow.editor.triggers")}
 								</span>
 								<WorkflowTriggersList
-									triggerTypes={[
-										"event",
-										"schedule",
-										"webhook",
-										"queue",
-									]}
+									triggerTypes={["schedule", "webhook"]}
 									onAddTrigger={addTrigger}
 									listClassName="tg:flex tg:flex-col tg:gap-1.5"
 									renderTrigger={(triggerType, onAdd) => (

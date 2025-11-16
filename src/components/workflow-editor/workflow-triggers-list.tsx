@@ -41,7 +41,7 @@ export interface WorkflowTriggersListProps {
  * @example
  * ```tsx
  * <WorkflowTriggersList
- *   triggerTypes={["event", "schedule", "webhook", "queue"]}
+ *   triggerTypes={["schedule", "webhook"]}
  *   onAddTrigger={(type) => handleAddTrigger(type)}
  *   renderTrigger={(type, onAdd) => (
  *     <button onClick={onAdd}>{type}</button>
@@ -50,7 +50,7 @@ export interface WorkflowTriggersListProps {
  * ```
  */
 export function WorkflowTriggersList({
-	triggerTypes = ["event", "schedule", "webhook", "queue"],
+	triggerTypes = ["schedule", "webhook"],
 	onAddTrigger,
 	renderTrigger,
 	className,

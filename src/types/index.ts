@@ -136,7 +136,7 @@ export interface NodeData extends Record<string, unknown> {
 /**
  * Trigger configuration types
  */
-export type TriggerType = "event" | "schedule" | "webhook" | "queue";
+export type TriggerType = "schedule" | "webhook";
 
 /**
  * Workflow version node structure
