@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import preserveUseClientDirective from "rollup-plugin-preserve-use-client";
 import { defineConfig } from "vite";
+import banner from "vite-plugin-banner";
 import dts from "vite-plugin-dts";
 
 export default defineConfig({
@@ -19,6 +20,10 @@ export default defineConfig({
 			],
 		}),
 		tailwindcss(),
+		banner({
+			content: "'use client';\n",
+			verify: false,
+		}),
 	],
 	resolve: {
 		alias: {
