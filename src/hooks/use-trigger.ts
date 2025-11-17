@@ -1,5 +1,12 @@
 "use client";
 
+import type {
+	UseMutateAsyncFunction,
+	UseMutateFunction,
+} from "@tanstack/react-query";
+import type { TriggerType } from "index.js";
+import type { Trigger } from "triglit/resources.js";
+
 import {
 	useCreateTrigger,
 	useDeleteTrigger,
@@ -11,17 +18,59 @@ import {
  * Return type for useTrigger hook
  */
 export interface UseTriggerReturn {
-	trigger: unknown;
+	trigger: Trigger | undefined;
 	isLoading: boolean;
 	isError: boolean;
 	error: unknown;
 	refetch: () => void;
-	createTrigger: (data: unknown) => void;
-	createTriggerAsync: (data: unknown) => Promise<unknown>;
-	updateTrigger: (data: unknown) => void;
-	updateTriggerAsync: (data: unknown) => Promise<unknown>;
-	deleteTrigger: (id: string) => void;
-	deleteTriggerAsync: (id: string) => Promise<void>;
+	createTrigger: UseMutateFunction<
+		Trigger,
+		Error,
+		{
+			workflowVersionId: string;
+			type: TriggerType;
+			name?: string | undefined;
+			config?: Record<string, unknown> | undefined;
+			isActive?: boolean | undefined;
+		},
+		unknown
+	>;
+	createTriggerAsync: UseMutateAsyncFunction<
+		Trigger,
+		Error,
+		{
+			workflowVersionId: string;
+			type: TriggerType;
+			name?: string | undefined;
+			config?: Record<string, unknown> | undefined;
+			isActive?: boolean | undefined;
+		},
+		unknown
+	>;
+	updateTrigger: UseMutateFunction<
+		Trigger,
+		Error,
+		{
+			triggerId: string;
+			name?: string | undefined;
+			config?: Record<string, unknown> | undefined;
+			isActive?: boolean | undefined;
+		},
+		unknown
+	>;
+	updateTriggerAsync: UseMutateAsyncFunction<
+		Trigger,
+		Error,
+		{
+			triggerId: string;
+			name?: string | undefined;
+			config?: Record<string, unknown> | undefined;
+			isActive?: boolean | undefined;
+		},
+		unknown
+	>;
+	deleteTrigger: UseMutateFunction<void, Error, string, unknown>;
+	deleteTriggerAsync: UseMutateAsyncFunction<void, Error, string, unknown>;
 	isCreating: boolean;
 	isUpdating: boolean;
 	isDeleting: boolean;
@@ -55,18 +104,12 @@ export function useTrigger(
 		isError: triggerQuery.isError,
 		error: triggerQuery.error,
 		refetch: triggerQuery.refetch,
-		createTrigger: createMutation.mutate as (data: unknown) => void,
-		createTriggerAsync: createMutation.mutateAsync as (
-			data: unknown,
-		) => Promise<unknown>,
-		updateTrigger: updateMutation.mutate as (data: unknown) => void,
-		updateTriggerAsync: updateMutation.mutateAsync as (
-			data: unknown,
-		) => Promise<unknown>,
-		deleteTrigger: deleteMutation.mutate as (id: string) => void,
-		deleteTriggerAsync: deleteMutation.mutateAsync as (
-			id: string,
-		) => Promise<void>,
+		createTrigger: createMutation.mutate,
+		createTriggerAsync: createMutation.mutateAsync,
+		updateTrigger: updateMutation.mutate,
+		updateTriggerAsync: updateMutation.mutateAsync,
+		deleteTrigger: deleteMutation.mutate,
+		deleteTriggerAsync: deleteMutation.mutateAsync,
 		isCreating: createMutation.isPending,
 		isUpdating: updateMutation.isPending,
 		isDeleting: deleteMutation.isPending,

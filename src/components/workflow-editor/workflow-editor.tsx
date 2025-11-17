@@ -430,8 +430,7 @@ export function WorkflowEditor({
 			try {
 				await updateVersionAsync({
 					versionId: selectedVersionId,
-					nodes: versionNodes,
-					edges: versionEdges,
+					data: { nodes: versionNodes, edges: versionEdges },
 				});
 			} catch (error) {
 				console.error("Error updating version:", error);

@@ -2,6 +2,7 @@
 
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { Trigger } from "triglit/resources.js";
 
 import type { TriggerType } from "../../types/index.js";
 import { useTriglit } from "../use-triglit.js";
@@ -32,7 +33,7 @@ export function useTriggers(options?: {
 	workflowVersionId?: string;
 	pageSize?: number;
 	enabled?: boolean;
-}): UseQueryResult<unknown, Error> {
+}) {
 	const { client } = useTriglit();
 
 	return useQuery({
@@ -69,7 +70,7 @@ export function useTriggers(options?: {
 export function useTrigger(
 	triggerId: string,
 	options?: { enabled?: boolean },
-): UseQueryResult<unknown, Error> {
+): UseQueryResult<Trigger, Error> {
 	const { client } = useTriglit();
 
 	return useQuery({
@@ -100,18 +101,7 @@ export function useTrigger(
  * };
  * ```
  */
-export function useCreateTrigger(): UseMutationResult<
-	unknown,
-	Error,
-	{
-		workflowVersionId: string;
-		type: TriggerType;
-		name?: string;
-		config?: Record<string, unknown>;
-		isActive?: boolean;
-	},
-	unknown
-> {
+export function useCreateTrigger() {
 	const { client, callbacks } = useTriglit();
 	const queryClient = useQueryClient();
 
@@ -167,17 +157,7 @@ export function useCreateTrigger(): UseMutationResult<
  * };
  * ```
  */
-export function useUpdateTrigger(): UseMutationResult<
-	unknown,
-	Error,
-	{
-		triggerId: string;
-		name?: string;
-		config?: Record<string, unknown>;
-		isActive?: boolean;
-	},
-	unknown
-> {
+export function useUpdateTrigger() {
 	const { client, callbacks } = useTriglit();
 	const queryClient = useQueryClient();
 
@@ -225,7 +205,7 @@ export function useUpdateTrigger(): UseMutationResult<
  * ```
  */
 export function useDeleteTrigger(): UseMutationResult<
-	unknown,
+	void,
 	Error,
 	string,
 	unknown

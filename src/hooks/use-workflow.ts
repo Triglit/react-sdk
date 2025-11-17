@@ -1,9 +1,42 @@
 "use client";
 
+import type {
+	UseMutateAsyncFunction,
+	UseMutateFunction,
+} from "@tanstack/react-query";
+import type { Workflow } from "triglit/resources.js";
+
 import {
 	useCreateWorkflow,
 	useWorkflow as useWorkflowQuery,
 } from "./api/use-workflows.js";
+
+export interface UseWorkflowReturn {
+	workflow: Workflow | undefined;
+	isLoading: boolean;
+	isError: boolean;
+	error: unknown;
+	refetch: () => void;
+	createWorkflow: UseMutateFunction<
+		unknown,
+		Error,
+		{
+			name: string;
+			description?: string | undefined;
+		},
+		unknown
+	>;
+	createWorkflowAsync: UseMutateAsyncFunction<
+		unknown,
+		Error,
+		{
+			name: string;
+			description?: string | undefined;
+		},
+		unknown
+	>;
+	isCreating: boolean;
+}
 
 /**
  * Hook to manage a specific workflow
@@ -21,7 +54,7 @@ import {
 export function useWorkflow(
 	workflowId: string,
 	options?: { enabled?: boolean },
-) {
+): UseWorkflowReturn {
 	const workflowQuery = useWorkflowQuery(workflowId, options);
 	const createMutation = useCreateWorkflow();
 

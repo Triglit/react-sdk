@@ -1,11 +1,75 @@
 "use client";
 
+import type {
+	UseMutateAsyncFunction,
+	UseMutateFunction,
+} from "@tanstack/react-query";
+import type {
+	VersionCreateParams,
+	VersionPublishResponse,
+	VersionUpdateParams,
+	WorkflowVersion,
+} from "triglit/resources/workflows.mjs";
+
 import {
 	useCreateWorkflowVersion,
 	usePublishWorkflowVersion,
 	useUpdateWorkflowVersion,
 	useWorkflowVersion as useWorkflowVersionQuery,
 } from "./api/use-workflow-versions.js";
+
+export interface UseWorkflowVersionReturn {
+	version: WorkflowVersion | undefined;
+	isLoading: boolean;
+	isError: boolean;
+	error: unknown;
+	refetch: () => void;
+	createVersion: UseMutateFunction<
+		WorkflowVersion,
+		Error,
+		VersionCreateParams,
+		unknown
+	>;
+	createVersionAsync: UseMutateAsyncFunction<
+		WorkflowVersion,
+		Error,
+		VersionCreateParams,
+		unknown
+	>;
+	updateVersion: UseMutateFunction<
+		WorkflowVersion,
+		Error,
+		{
+			versionId: string;
+			data: VersionUpdateParams;
+		},
+		unknown
+	>;
+	updateVersionAsync: UseMutateAsyncFunction<
+		WorkflowVersion,
+		Error,
+		{
+			versionId: string;
+			data: VersionUpdateParams;
+		},
+		unknown
+	>;
+	publishVersion: UseMutateFunction<
+		VersionPublishResponse,
+		Error,
+		string,
+		unknown
+	>;
+	publishVersionAsync: UseMutateAsyncFunction<
+		VersionPublishResponse,
+		Error,
+		string,
+		unknown
+	>;
+	isCreating: boolean;
+	isUpdating: boolean;
+	isPublishing: boolean;
+}
 
 /**
  * Hook to manage a specific workflow version
@@ -23,7 +87,7 @@ import {
 export function useWorkflowVersion(
 	versionId: string,
 	options?: { enabled?: boolean },
-) {
+): UseWorkflowVersionReturn {
 	const versionQuery = useWorkflowVersionQuery(versionId, options);
 	const createMutation = useCreateWorkflowVersion();
 	const updateMutation = useUpdateWorkflowVersion();

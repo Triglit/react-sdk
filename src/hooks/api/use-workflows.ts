@@ -27,7 +27,7 @@ import { useTriglit } from "../use-triglit.js";
 export function useWorkflows(options?: {
 	pageSize?: number;
 	enabled?: boolean;
-}): UseQueryResult<unknown, Error> {
+}) {
 	const { client } = useTriglit();
 
 	return useQuery({
@@ -51,7 +51,7 @@ export function useWorkflows(options?: {
 export function useWorkflow(
 	workflowId: string,
 	options?: { enabled?: boolean },
-): UseQueryResult<unknown, Error> {
+): UseQueryResult<Workflow, Error> {
 	const { client } = useTriglit();
 
 	return useQuery({

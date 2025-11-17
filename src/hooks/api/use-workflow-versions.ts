@@ -8,7 +8,9 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import type {
+	VersionCreateParams,
 	VersionPublishResponse,
+	VersionUpdateParams,
 	WorkflowVersionsPageBased,
 } from "triglit/resources/workflows.mjs";
 
@@ -90,27 +92,7 @@ export function useCreateWorkflowVersion() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (data: {
-			workflowId: string;
-			nodes: Array<{
-				id: string;
-				type: string;
-				version?: string;
-				name: string;
-				description?: string;
-				config: Record<string, unknown>;
-				inputSchema: Record<string, unknown>;
-				outputSchema: Record<string, unknown>;
-				position?: { x: number; y: number };
-			}>;
-			edges: Array<{
-				sourceNodeId: string;
-				targetNodeId: string;
-				sourceOutputKey?: string;
-				targetInputKey?: string;
-				label?: string;
-			}>;
-		}) => {
+		mutationFn: async (data: VersionCreateParams) => {
 			// Ensure inputSchema, outputSchema, config, position, and version are always set
 			const normalizedData = {
 				...data,
@@ -152,50 +134,18 @@ export function useUpdateWorkflowVersion() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (data: {
+		mutationFn: async ({
+			versionId,
+			data,
+		}: {
 			versionId: string;
-			nodes: Array<{
-				id: string;
-				type: string;
-				version?: string;
-				name: string;
-				description?: string;
-				config: Record<string, unknown>;
-				inputSchema: Record<string, unknown>;
-				outputSchema: Record<string, unknown>;
-				position?: { x: number; y: number };
-			}>;
-			edges: Array<{
-				sourceNodeId: string;
-				targetNodeId: string;
-				sourceOutputKey?: string;
-				targetInputKey?: string;
-				label?: string;
-			}>;
+			data: VersionUpdateParams;
 		}) => {
-			const { versionId, ...updateData } = data;
-			// Ensure inputSchema, outputSchema, config, position, and version are always set
-			const normalizedData = {
-				...updateData,
-				nodes: updateData.nodes.map((node) => ({
-					...node,
-					version: node.version || "1.0.0",
-					inputSchema: node.inputSchema || {},
-					outputSchema: node.outputSchema || {},
-					config: node.config || {},
-					position: node.position || { x: 0, y: 0 },
-				})),
-			};
-			return client.workflows.versions.update(
-				versionId,
-				normalizedData as unknown as Parameters<
-					typeof client.workflows.versions.update
-				>[1],
-			);
+			return client.workflows.versions.update(versionId, data);
 		},
-		onSuccess: (data) => {
+		onSuccess: (data, variables) => {
 			queryClient.invalidateQueries({
-				queryKey: ["triglit", "workflow-versions", data.id],
+				queryKey: ["triglit", "workflow-versions", variables.versionId],
 			});
 			queryClient.invalidateQueries({
 				queryKey: ["triglit", "workflow-versions"],
