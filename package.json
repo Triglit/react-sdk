@@ -1,7 +1,7 @@
 {
 	"name": "@triglit/react-sdk",
 	"type": "module",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"description": "React SDK for Triglit",
 	"author": "João Pedro <contato@triglit.com>",
 	"license": "MIT",
@@ -28,6 +28,12 @@
 		"type": "git",
 		"url": "git+https://github.com/triglit/react-sdk.git"
 	},
+	"files": [
+		"dist",
+		"package.json",
+		"README.md",
+		"LICENSE"
+	],
 	"scripts": {
 		"build": "tsc && vite build && pnpm build:css",
 		"build:css": "pnpx @tailwindcss/cli -m -i ./src/tw.css -o ./dist/styles.css",

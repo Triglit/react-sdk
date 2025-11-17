@@ -13,6 +13,7 @@ export default defineConfig({
 		}),
 		dts({
 			exclude: [
+				".storybook/**/*",
 				"**/*.stories.{js,jsx,ts,tsx}",
 				"**/*.test.{js,jsx,ts,tsx}",
 			],
