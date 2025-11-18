@@ -169,9 +169,6 @@ export function WorkflowCanvas({
 		[customGetNodes, customGetEdges],
 	);
 
-	// Note: onConnect should be provided by the parent component
-	// as it needs access to edges state for validation
-
 	return (
 		<div className={className} style={{ width: "100%", height: "100%" }}>
 			<ReactFlow

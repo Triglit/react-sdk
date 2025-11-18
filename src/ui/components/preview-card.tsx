@@ -2,6 +2,7 @@
 
 import { PreviewCard as PreviewCardPrimitive } from "@base-ui-components/react/preview-card";
 
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const PreviewCard = PreviewCardPrimitive.Root;
@@ -25,8 +26,9 @@ function PreviewCardPopup({
 	align?: PreviewCardPrimitive.Positioner.Props["align"];
 	sideOffset?: PreviewCardPrimitive.Positioner.Props["sideOffset"];
 }) {
+	const container = useTriglitRootContainer();
 	return (
-		<PreviewCardPrimitive.Portal>
+		<PreviewCardPrimitive.Portal container={container || undefined}>
 			<PreviewCardPrimitive.Positioner
 				data-slot="preview-card-positioner"
 				className="tg:z-50"

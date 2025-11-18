@@ -3,6 +3,7 @@
 import { Dialog as DialogPrimitive } from "@base-ui-components/react/dialog";
 import { XIcon } from "lucide-react";
 
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const Dialog = DialogPrimitive.Root;
@@ -12,7 +13,13 @@ function DialogTrigger(props: DialogPrimitive.Trigger.Props) {
 }
 
 function DialogPortal(props: DialogPrimitive.Portal.Props) {
-	return <DialogPrimitive.Portal {...props} />;
+	const container = useTriglitRootContainer();
+	return (
+		<DialogPrimitive.Portal
+			{...props}
+			container={container || props.container}
+		/>
+	);
 }
 
 function DialogClose(props: DialogPrimitive.Close.Props) {
@@ -47,7 +54,7 @@ function DialogPopup({
 		<DialogPortal>
 			<DialogBackdrop />
 			<div className="tg:fixed tg:inset-0 tg:z-50">
-				<div className="tg:flex tg:h-[100dvh] tg:flex-col tg:items-center tg:overflow-hidden tg:pt-6 tg:max-sm:before:flex-1 tg:sm:overflow-y-auto tg:sm:p-4 tg:sm:after:flex-1 tg:sm:before:basis-[20vh]">
+				<div className="tg:flex tg:h-dvh tg:flex-col tg:items-center tg:overflow-hidden tg:pt-6 tg:max-sm:before:flex-1 tg:sm:overflow-y-auto tg:sm:p-4 tg:sm:after:flex-1 tg:sm:before:basis-[20vh]">
 					<DialogPrimitive.Popup
 						data-slot="dialog-popup"
 						className={cn(

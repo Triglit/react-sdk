@@ -4,11 +4,20 @@ import { Menu as MenuPrimitive } from "@base-ui-components/react/menu";
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 import type * as React from "react";
 
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const Menu = MenuPrimitive.Root;
 
-const MenuPortal = MenuPrimitive.Portal;
+function MenuPortal(props: MenuPrimitive.Portal.Props) {
+	const container = useTriglitRootContainer();
+	return (
+		<MenuPrimitive.Portal
+			{...props}
+			container={container || props.container}
+		/>
+	);
+}
 
 function MenuTrigger(props: MenuPrimitive.Trigger.Props) {
 	return <MenuPrimitive.Trigger data-slot="menu-trigger" {...props} />;
@@ -28,7 +37,7 @@ function MenuPopup({
 	side?: MenuPrimitive.Positioner.Props["side"];
 }) {
 	return (
-		<MenuPrimitive.Portal>
+		<MenuPortal>
 			<MenuPrimitive.Positioner
 				data-slot="menu-positioner"
 				className="tg:z-50"
@@ -49,7 +58,7 @@ function MenuPopup({
 					/>
 				</span>
 			</MenuPrimitive.Positioner>
-		</MenuPrimitive.Portal>
+		</MenuPortal>
 	);
 }
 

@@ -2,14 +2,14 @@
 
 import {
 	addEdge,
-	getOutgoers,
-	useEdgesState,
-	useNodesState,
-	useReactFlow,
 	type Edge,
+	getOutgoers,
 	type IsValidConnection,
 	type Node,
 	type OnConnect,
+	useEdgesState,
+	useNodesState,
+	useReactFlow,
 } from "@xyflow/react";
 import { DatabaseIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -50,8 +50,8 @@ import { NodeConfigDialog } from "./node-config-dialog.js";
 import { WorkflowCanvas } from "./workflow-canvas.js";
 import { WorkflowEditorHeader } from "./workflow-editor-header.js";
 import {
-	WorkflowNodesList,
 	type NodeRegistryItem,
+	WorkflowNodesList,
 } from "./workflow-nodes-list.js";
 import { WorkflowTriggersList } from "./workflow-triggers-list.js";
 

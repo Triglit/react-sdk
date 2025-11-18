@@ -2,6 +2,7 @@
 
 import { AlertDialog as AlertDialogPrimitive } from "@base-ui-components/react/alert-dialog";
 
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 function AlertDialog(props: AlertDialogPrimitive.Root.Props) {
@@ -18,7 +19,13 @@ function AlertDialogTrigger(props: AlertDialogPrimitive.Trigger.Props) {
 }
 
 function AlertDialogPortal(props: AlertDialogPrimitive.Portal.Props) {
-	return <AlertDialogPrimitive.Portal {...props} />;
+	const container = useTriglitRootContainer();
+	return (
+		<AlertDialogPrimitive.Portal
+			{...props}
+			container={container || props.container}
+		/>
+	);
 }
 
 function AlertDialogBackdrop({

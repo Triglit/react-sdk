@@ -4,6 +4,7 @@ import { Dialog as SheetPrimitive } from "@base-ui-components/react/dialog";
 import { cva, type VariantProps } from "class-variance-authority";
 import { XIcon } from "lucide-react";
 
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const Sheet = SheetPrimitive.Root;
@@ -13,7 +14,13 @@ function SheetTrigger(props: SheetPrimitive.Trigger.Props) {
 }
 
 function SheetPortal(props: SheetPrimitive.Portal.Props) {
-	return <SheetPrimitive.Portal {...props} />;
+	const container = useTriglitRootContainer();
+	return (
+		<SheetPrimitive.Portal
+			{...props}
+			container={container || props.container}
+		/>
+	);
 }
 
 function SheetClose(props: SheetPrimitive.Close.Props) {

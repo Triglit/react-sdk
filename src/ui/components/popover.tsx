@@ -2,6 +2,7 @@
 
 import { Popover as PopoverPrimitive } from "@base-ui-components/react/popover";
 
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const Popover = PopoverPrimitive.Root;
@@ -26,8 +27,9 @@ function PopoverPopup({
 	alignOffset?: PopoverPrimitive.Positioner.Props["alignOffset"];
 	tooltipStyle?: boolean;
 }) {
+	const container = useTriglitRootContainer();
 	return (
-		<PopoverPrimitive.Portal>
+		<PopoverPrimitive.Portal container={container || undefined}>
 			<PopoverPrimitive.Positioner
 				data-slot="popover-positioner"
 				className="tg:z-50"

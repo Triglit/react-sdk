@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { buttonVariants } from "@/ui/components/button.js";
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const toastManager = Toast.createToastManager();
@@ -50,9 +51,13 @@ function ToastProvider({
 function ToastList({ position = "bottom-right" }: { position: ToastPosition }) {
 	const { toasts } = Toast.useToastManager();
 	const isTop = position.startsWith("top");
+	const container = useTriglitRootContainer();
 
 	return (
-		<Toast.Portal data-slot="toast-portal">
+		<Toast.Portal
+			data-slot="toast-portal"
+			container={container || undefined}
+		>
 			<Toast.Viewport
 				className={cn(
 					"tg:fixed tg:z-50 tg:mx-auto tg:flex tg:w-[calc(100%-var(--toast-inset)*2)] tg:max-w-90 tg:[--toast-inset:--spacing(4)] tg:sm:[--toast-inset:--spacing(8)]",

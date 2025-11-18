@@ -5,6 +5,7 @@ import { ChevronsUpDownIcon, XIcon } from "lucide-react";
 
 import { Input } from "@/ui/components/input.js";
 import { ScrollArea } from "@/ui/components/scroll-area.js";
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const Autocomplete = AutocompletePrimitive.Root;
@@ -67,8 +68,9 @@ function AutocompletePopup({
 }: AutocompletePrimitive.Popup.Props & {
 	sideOffset?: number;
 }) {
+	const container = useTriglitRootContainer();
 	return (
-		<AutocompletePrimitive.Portal>
+		<AutocompletePrimitive.Portal container={container || undefined}>
 			<AutocompletePrimitive.Positioner
 				data-slot="autocomplete-positioner"
 				className="tg:z-50 tg:select-none"

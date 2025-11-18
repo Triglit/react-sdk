@@ -6,6 +6,7 @@ import * as React from "react";
 
 import { Input } from "@/ui/components/input.js";
 import { ScrollArea } from "@/ui/components/scroll-area.js";
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const ComboboxContext = React.createContext<{
@@ -128,9 +129,10 @@ function ComboboxPopup({
 	sideOffset?: number;
 }) {
 	const { chipsRef } = React.useContext(ComboboxContext);
+	const container = useTriglitRootContainer();
 
 	return (
-		<ComboboxPrimitive.Portal>
+		<ComboboxPrimitive.Portal container={container || undefined}>
 			<ComboboxPrimitive.Positioner
 				data-slot="combobox-positioner"
 				className="tg:z-50 tg:select-none"

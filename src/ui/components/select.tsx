@@ -7,6 +7,7 @@ import {
 	ChevronUpIcon,
 } from "lucide-react";
 
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const Select = SelectPrimitive.Root;
@@ -59,8 +60,9 @@ function SelectPopup({
 	sideOffset?: SelectPrimitive.Positioner.Props["sideOffset"];
 	alignItemWithTrigger?: SelectPrimitive.Positioner.Props["alignItemWithTrigger"];
 }) {
+	const container = useTriglitRootContainer();
 	return (
-		<SelectPrimitive.Portal>
+		<SelectPrimitive.Portal container={container || undefined}>
 			<SelectPrimitive.Positioner
 				data-slot="select-positioner"
 				className="tg:z-50 tg:select-none"

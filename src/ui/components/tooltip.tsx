@@ -2,6 +2,7 @@
 
 import { Tooltip as TooltipPrimitive } from "@base-ui-components/react/tooltip";
 
+import { useTriglitRootContainer } from "@/ui/lib/portal-container.js";
 import { cn } from "@/ui/lib/utils.js";
 
 const TooltipProvider = TooltipPrimitive.Provider;
@@ -24,8 +25,9 @@ function TooltipPopup({
 	side?: TooltipPrimitive.Positioner.Props["side"];
 	sideOffset?: TooltipPrimitive.Positioner.Props["sideOffset"];
 }) {
+	const container = useTriglitRootContainer();
 	return (
-		<TooltipPrimitive.Portal>
+		<TooltipPrimitive.Portal container={container || undefined}>
 			<TooltipPrimitive.Positioner
 				data-slot="tooltip-positioner"
 				className="tg:z-50"
