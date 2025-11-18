@@ -129,15 +129,7 @@ export function useCreateWorkflow(): UseMutationResult<
  * };
  * ```
  */
-export function useUpdateWorkflow(): UseMutationResult<
-	Workflow,
-	Error,
-	{
-		workflowId: string;
-		data: WorkflowUpdateParams;
-	},
-	unknown
-> {
+export function useUpdateWorkflow() {
 	const { client, callbacks } = useTriglit();
 	const queryClient = useQueryClient();
 
@@ -180,12 +172,7 @@ export function useUpdateWorkflow(): UseMutationResult<
  * };
  * ```
  */
-export function useDeleteWorkflow(): UseMutationResult<
-	void,
-	Error,
-	string,
-	unknown
-> {
+export function useDeleteWorkflow() {
 	const { client, callbacks } = useTriglit();
 	const queryClient = useQueryClient();
 
