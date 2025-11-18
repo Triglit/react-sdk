@@ -2,14 +2,14 @@
 
 import {
 	addEdge,
-	type Edge,
 	getOutgoers,
-	type IsValidConnection,
-	type Node,
-	type OnConnect,
 	useEdgesState,
 	useNodesState,
 	useReactFlow,
+	type Edge,
+	type IsValidConnection,
+	type Node,
+	type OnConnect,
 } from "@xyflow/react";
 import { DatabaseIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
@@ -50,8 +50,8 @@ import { NodeConfigDialog } from "./node-config-dialog.js";
 import { WorkflowCanvas } from "./workflow-canvas.js";
 import { WorkflowEditorHeader } from "./workflow-editor-header.js";
 import {
-	type NodeRegistryItem,
 	WorkflowNodesList,
+	type NodeRegistryItem,
 } from "./workflow-nodes-list.js";
 import { WorkflowTriggersList } from "./workflow-triggers-list.js";
 
@@ -827,7 +827,7 @@ export function WorkflowEditor({
 							</div>
 						</ScrollArea>
 					</FrameHeader>
-					<FramePanel className="tg:h-full tg:w-full tg:p-1!">
+					<FramePanel className="tg:w-full tg:p-1!">
 						<WorkflowCanvas
 							nodes={nodes}
 							edges={edges}

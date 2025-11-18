@@ -153,9 +153,6 @@
 	.triglit-root * {
 	  @apply tg:border-border tg:outline-ring/50;
 	}
-	.triglit-root {
-	  @apply tg:bg-background tg:text-foreground;
-	}
   }
 
 .triglit-root .react-flow__attribution {
