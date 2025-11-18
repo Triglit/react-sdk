@@ -73,6 +73,8 @@ export {
 } from "./hooks/api/use-workflow-versions.js";
 export {
 	useCreateWorkflow,
+	useDeleteWorkflow,
+	useUpdateWorkflow,
 	useWorkflow as useWorkflowQuery,
 	useWorkflows,
 } from "./hooks/api/use-workflows.js";

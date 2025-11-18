@@ -4,10 +4,16 @@ import type {
 	UseMutateAsyncFunction,
 	UseMutateFunction,
 } from "@tanstack/react-query";
-import type { Workflow } from "triglit/resources.js";
+import type {
+	Workflow,
+	WorkflowCreateParams,
+	WorkflowUpdateParams,
+} from "triglit/resources.js";
 
 import {
 	useCreateWorkflow,
+	useDeleteWorkflow,
+	useUpdateWorkflow,
 	useWorkflow as useWorkflowQuery,
 } from "./api/use-workflows.js";
 
@@ -18,24 +24,40 @@ export interface UseWorkflowReturn {
 	error: unknown;
 	refetch: () => void;
 	createWorkflow: UseMutateFunction<
-		unknown,
+		Workflow,
 		Error,
-		{
-			name: string;
-			description?: string | undefined;
-		},
+		WorkflowCreateParams,
 		unknown
 	>;
 	createWorkflowAsync: UseMutateAsyncFunction<
-		unknown,
+		Workflow,
+		Error,
+		WorkflowCreateParams,
+		unknown
+	>;
+	updateWorkflow: UseMutateFunction<
+		Workflow,
 		Error,
 		{
-			name: string;
-			description?: string | undefined;
+			workflowId: string;
+			data: WorkflowUpdateParams;
 		},
 		unknown
 	>;
+	updateWorkflowAsync: UseMutateAsyncFunction<
+		Workflow,
+		Error,
+		{
+			workflowId: string;
+			data: WorkflowUpdateParams;
+		},
+		unknown
+	>;
+	deleteWorkflow: UseMutateFunction<void, Error, string, unknown>;
+	deleteWorkflowAsync: UseMutateAsyncFunction<void, Error, string, unknown>;
 	isCreating: boolean;
+	isUpdating: boolean;
+	isDeleting: boolean;
 }
 
 /**
@@ -48,7 +70,7 @@ export interface UseWorkflowReturn {
  *
  * @example
  * ```tsx
- * const { workflow, isLoading, createWorkflow } = useWorkflow(workflowId);
+ * const { workflow, isLoading, updateWorkflow, deleteWorkflow } = useWorkflow(workflowId);
  * ```
  */
 export function useWorkflow(
@@ -57,6 +79,8 @@ export function useWorkflow(
 ): UseWorkflowReturn {
 	const workflowQuery = useWorkflowQuery(workflowId, options);
 	const createMutation = useCreateWorkflow();
+	const updateMutation = useUpdateWorkflow();
+	const deleteMutation = useDeleteWorkflow();
 
 	return {
 		workflow: workflowQuery.data,
@@ -66,6 +90,12 @@ export function useWorkflow(
 		refetch: workflowQuery.refetch,
 		createWorkflow: createMutation.mutate,
 		createWorkflowAsync: createMutation.mutateAsync,
+		updateWorkflow: updateMutation.mutate,
+		updateWorkflowAsync: updateMutation.mutateAsync,
+		deleteWorkflow: deleteMutation.mutate,
+		deleteWorkflowAsync: deleteMutation.mutateAsync,
 		isCreating: createMutation.isPending,
+		isUpdating: updateMutation.isPending,
+		isDeleting: deleteMutation.isPending,
 	};
 }

@@ -2,6 +2,10 @@
 
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type {
+	WorkflowCreateParams,
+	WorkflowUpdateParams,
+} from "triglit/resources";
 import type { Workflow } from "triglit/resources.js";
 
 import { useTriglit } from "../use-triglit.js";
@@ -81,26 +85,17 @@ export function useWorkflow(
  * ```
  */
 export function useCreateWorkflow(): UseMutationResult<
-	unknown,
+	Workflow,
 	Error,
-	{ name: string; description?: string },
+	WorkflowCreateParams,
 	unknown
 > {
 	const { client, callbacks } = useTriglit();
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: async (data: { name: string; description?: string }) => {
-			// Type assertion needed as the SDK types may not be fully exposed
-			// The public API SDK should have a create method according to documentation
-			return (
-				client.workflows as unknown as {
-					create: (data: {
-						name: string;
-						description?: string;
-					}) => Promise<unknown>;
-				}
-			).create(data);
+		mutationFn: async (data: WorkflowCreateParams) => {
+			return client.workflows.create(data);
 		},
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({
@@ -110,6 +105,105 @@ export function useCreateWorkflow(): UseMutationResult<
 		},
 		onError: (error) => {
 			callbacks.onWorkflowCreateError?.(error);
+		},
+	});
+}
+
+/**
+ * Hook to update a workflow
+ *
+ * @returns Mutation result for updating a workflow
+ *
+ * @example
+ * ```tsx
+ * const updateWorkflow = useUpdateWorkflow();
+ *
+ * const handleUpdate = () => {
+ *   updateWorkflow.mutate({
+ *     workflowId: 'wf_123',
+ *     data: {
+ *       name: "Updated Workflow Name",
+ *       description: "Updated description"
+ *     }
+ *   });
+ * };
+ * ```
+ */
+export function useUpdateWorkflow(): UseMutationResult<
+	Workflow,
+	Error,
+	{
+		workflowId: string;
+		data: WorkflowUpdateParams;
+	},
+	unknown
+> {
+	const { client, callbacks } = useTriglit();
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async ({
+			workflowId,
+			data,
+		}: {
+			workflowId: string;
+			data: WorkflowUpdateParams;
+		}) => {
+			return client.workflows.update(workflowId, data);
+		},
+		onSuccess: (data, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: ["triglit", "workflows", variables.workflowId],
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["triglit", "workflows"],
+			});
+			callbacks.onWorkflowUpdated?.(data as Workflow);
+		},
+		onError: (error) => {
+			callbacks.onWorkflowUpdateError?.(error);
+		},
+	});
+}
+
+/**
+ * Hook to delete a workflow
+ *
+ * @returns Mutation result for deleting a workflow
+ *
+ * @example
+ * ```tsx
+ * const deleteWorkflow = useDeleteWorkflow();
+ *
+ * const handleDelete = () => {
+ *   deleteWorkflow.mutate('wf_123');
+ * };
+ * ```
+ */
+export function useDeleteWorkflow(): UseMutationResult<
+	void,
+	Error,
+	string,
+	unknown
+> {
+	const { client, callbacks } = useTriglit();
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (workflowId: string) => {
+			return client.workflows.delete(workflowId);
+		},
+		onSuccess: (_, workflowId) => {
+			queryClient.invalidateQueries({
+				queryKey: ["triglit", "workflows", workflowId],
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["triglit", "workflows"],
+			});
+			callbacks.onWorkflowDeleted?.();
+		},
+		onError: (error) => {
+			callbacks.onWorkflowDeleteError?.(error);
 		},
 	});
 }

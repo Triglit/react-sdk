@@ -67,6 +67,22 @@ export interface TriglitMutationCallbacks {
 	 * Called when creating a workflow fails
 	 */
 	onWorkflowCreateError?: (error: Error) => void;
+	/**
+	 * Called when a workflow is updated successfully
+	 */
+	onWorkflowUpdated?: (data: Workflow) => void;
+	/**
+	 * Called when updating a workflow fails
+	 */
+	onWorkflowUpdateError?: (error: Error) => void;
+	/**
+	 * Called when a workflow is deleted successfully
+	 */
+	onWorkflowDeleted?: () => void;
+	/**
+	 * Called when deleting a workflow fails
+	 */
+	onWorkflowDeleteError?: (error: Error) => void;
 }
 
 /**
