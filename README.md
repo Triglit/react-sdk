@@ -182,6 +182,7 @@ import { WorkflowEditor } from '@triglit/react-sdk';
 - `initialVersionId` (string, opcional): ID da versão inicial a carregar
 - `onSave` (function, opcional): Callback chamado quando o workflow é salvo
 - `className` (string, opcional): Classe CSS customizada
+- `dynamicEnumOptions` (function, opcional): Callback para fornecer opções dinâmicas para campos enum marcados como dinâmicos. Recebe `fieldName` e `nodeType`, retorna array de opções `{label: string, value: string}[]` ou `undefined`
 
 ### Componentes de Status
 
@@ -202,6 +203,48 @@ import {
 
 // API degradada
 <TriglitDegraded />
+```
+
+### Campos Enum Dinâmicos
+
+Campos enum podem ser marcados como dinâmicos no schema do custom node. Quando um campo enum é dinâmico, suas opções são fornecidas em runtime através do callback `dynamicEnumOptions`:
+
+```tsx
+<WorkflowEditor
+  workflowId="wf_123"
+  dynamicEnumOptions={(fieldName, nodeType) => {
+    // Exemplo: campo "agents" no node "distribute-agent"
+    if (fieldName === "agents" && nodeType === "distribute-agent") {
+      // Buscar agentes da sua plataforma
+      return [
+        { label: "João Silva", value: "agent_1" },
+        { label: "Maria Santos", value: "agent_2" },
+        { label: "Pedro Costa", value: "agent_3" }
+      ];
+    }
+    // Retornar undefined se o campo não for dinâmico ou não tiver opções
+    return undefined;
+  }}
+/>
+```
+
+**Comportamento:**
+- Se `dynamicEnumOptions` retornar opções: o campo é renderizado como um select normal com as opções fornecidas
+- Se `dynamicEnumOptions` retornar `undefined` ou array vazio: o campo é renderizado como um campo de texto livre (TextInput)
+- Valores já preenchidos no config são preservados e exibidos
+
+**Schema do Custom Node (Backend):**
+```json
+{
+  "configSchema": {
+    "agents": {
+      "type": "enum",
+      "description": "Lista de agentes para distribuição",
+      "required": true,
+      "dynamic": true
+    }
+  }
+}
 ```
 
 ### Componentes de Editor

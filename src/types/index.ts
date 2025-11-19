@@ -221,6 +221,14 @@ export interface TriggersListResponse {
 }
 
 /**
+ * Dynamic enum option
+ */
+export interface DynamicEnumOption {
+	label: string;
+	value: string;
+}
+
+/**
  * Workflow editor props
  */
 export interface WorkflowEditorProps {
@@ -240,4 +248,12 @@ export interface WorkflowEditorProps {
 	 * Custom className for styling
 	 */
 	className?: string;
+	/**
+	 * Callback to provide dynamic enum options for fields marked as dynamic.
+	 * Receives field name and node type, returns array of options or undefined.
+	 */
+	dynamicEnumOptions?: (
+		fieldName: string,
+		nodeType: string,
+	) => DynamicEnumOption[] | undefined;
 }

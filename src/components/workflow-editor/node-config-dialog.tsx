@@ -78,6 +78,14 @@ export interface NodeConfigDialogProps {
 		customName: string,
 		customId: string,
 	) => void;
+	/**
+	 * Callback to provide dynamic enum options for fields marked as dynamic.
+	 * Receives field name and node type, returns array of options or undefined.
+	 */
+	dynamicEnumOptions?: (
+		fieldName: string,
+		nodeType: string,
+	) => Array<{ label: string; value: string }> | undefined;
 }
 
 /**
@@ -110,6 +118,7 @@ export function NodeConfigDialog({
 	currentCustomId,
 	allNodeIds,
 	onSave,
+	dynamicEnumOptions,
 }: NodeConfigDialogProps) {
 	const t = useI18n();
 
@@ -301,6 +310,10 @@ export function NodeConfigDialog({
 											}}
 											definition={field}
 											error={errors[field.name]}
+											dynamicEnumOptions={
+												dynamicEnumOptions
+											}
+											nodeType={nodeType}
 										/>
 									);
 								})}

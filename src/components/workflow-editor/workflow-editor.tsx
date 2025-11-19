@@ -74,6 +74,7 @@ export function WorkflowEditor({
 	initialVersionId,
 	onSave,
 	className,
+	dynamicEnumOptions,
 }: WorkflowEditorProps) {
 	const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>([]);
 	const [edges, setEdges, onEdgesChangeBase] = useEdgesState<Edge>([]);
@@ -926,6 +927,7 @@ export function WorkflowEditor({
 				}
 				allNodeIds={nodes.map((n) => n.id)}
 				onSave={handleConfigSave}
+				dynamicEnumOptions={dynamicEnumOptions}
 			/>
 
 			<Frame className={cn("tg:flex tg:h-full tg:flex-col", className)}>

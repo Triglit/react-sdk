@@ -14,6 +14,7 @@ export interface ConfigFieldDefinition {
 	description?: string;
 	default?: unknown;
 	options?: unknown[];
+	dynamic?: boolean;
 	validation?: {
 		min?: number;
 		max?: number;
@@ -39,6 +40,7 @@ interface SchemaProperty {
 	description?: string;
 	default?: unknown;
 	enum?: string[];
+	dynamic?: boolean;
 	minimum?: number;
 	maximum?: number;
 	min?: number;
@@ -131,6 +133,7 @@ function parseSchemaProperty(
 		description: property.description,
 		default: property.default,
 		options: property.enum,
+		dynamic: property.dynamic,
 		validation: {
 			min: minValue,
 			max: maxValue,
