@@ -1,11 +1,11 @@
 "use client";
 
 import {
-	type UseMutationResult,
-	type UseQueryResult,
 	useMutation,
 	useQuery,
 	useQueryClient,
+	type UseMutationResult,
+	type UseQueryResult,
 } from "@tanstack/react-query";
 import type {
 	VersionCreateParams,
@@ -68,6 +68,10 @@ export function useWorkflowVersions(options?: {
 
 /**
  * Hook to retrieve a specific workflow version
+ *
+ * _IMPORTANT_: Refetch options are disabled to prevent data loss in the editor.
+ * When users are editing a workflow version, automatic refetches would overwrite
+ * their unsaved changes. Manual refetch is still available via the refetch function.
  */
 export function useWorkflowVersion(
 	versionId: string,
@@ -81,6 +85,10 @@ export function useWorkflowVersion(
 			return client.workflows.versions.retrieve0(versionId);
 		},
 		enabled: options?.enabled !== false && !!versionId,
+		// Disable automatic refetches to prevent data loss in the editor
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
 	});
 }
 

@@ -11,6 +11,10 @@ import { useTriglit } from "../use-triglit.js";
  * Hook to list triggers
  * Uses Triglit's pagination API with pageSize
  *
+ * _IMPORTANT_: Refetch options are disabled to prevent data loss in the editor.
+ * When users are editing a workflow version, automatic refetches would overwrite
+ * their unsaved changes. Manual refetch is still available via the refetch function.
+ *
  * @param options - Query options
  * @param options.workflowVersionId - Optional workflow version ID to filter triggers
  * @param options.pageSize - Number of items per page (default: API default)
@@ -57,6 +61,11 @@ export function useTriggers(options?: {
 			});
 		},
 		enabled: options?.enabled !== false,
+		// Disable automatic refetches to prevent data loss in the editor
+		// Triggers are managed separately and refetches could cause desynchronization
+		refetchOnWindowFocus: false,
+		refetchOnMount: false,
+		refetchOnReconnect: false,
 	});
 }
 
