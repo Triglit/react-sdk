@@ -1,7 +1,7 @@
 {
 	"name": "@triglit/react-sdk",
 	"type": "module",
-	"version": "0.5.5",
+	"version": "0.5.6",
 	"description": "React SDK for Triglit",
 	"author": "João Pedro <contato@triglit.com>",
 	"license": "MIT",
@@ -76,6 +76,7 @@
 		"@vitejs/plugin-react": "^5.1.1",
 		"commitizen": "^4.3.1",
 		"cz-conventional-changelog": "^3.3.0",
+		"dotenv": "^17.2.3",
 		"rollup-plugin-preserve-use-client": "^3.0.1",
 		"storybook": "^10.0.7",
 		"tailwindcss": "^4.1.17",

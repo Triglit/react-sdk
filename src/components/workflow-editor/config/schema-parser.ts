@@ -79,15 +79,20 @@ function fieldNameToLabel(name: string): string {
  * Determine input type from schema property
  */
 function determineInputType(property: SchemaProperty): string {
-	// If has enum, it's a select
-	if (property.enum && property.enum.length > 0) {
-		return "enum";
-	}
-
 	// If array of types, take first
 	const type = Array.isArray(property.type)
 		? property.type[0]
 		: property.type || "string";
+
+	// If type is explicitly "enum", always return "enum" (even if enum array is empty for dynamic enums)
+	if (type.toLowerCase() === "enum") {
+		return "enum";
+	}
+
+	// If has enum array with values, it's a select
+	if (property.enum && property.enum.length > 0) {
+		return "enum";
+	}
 
 	switch (type.toLowerCase()) {
 		case "string":

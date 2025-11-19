@@ -30,7 +30,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 		<QueryClientProvider client={queryClient}>
 			<TriglitProvider
 				config={{
-					apiKey: "pk_egUsKd0kHxSIA94BSc0Hf5oq64low8NQvs9mFzXBQuXrHfGVAXzu8gVLhFIdMg88",
+					apiKey: import.meta.env.VITE_TRIGLIT_PUBLISHABLE_KEY,
 				}}
 			>
 				<div className="tg:h-screen tg:w-screen">{children}</div>
@@ -80,4 +80,56 @@ export const WithOnSave: Story = {
 			</Wrapper>
 		),
 	],
+};
+
+export const WithDynamicEnumOptions: Story = {
+	args: {
+		workflowId: "wf_test_123",
+		dynamicEnumOptions: (fieldName, nodeType) => {
+			console.log(fieldName, nodeType);
+			// Simula o caso de uso "Distribuir Agente"
+			if (nodeType === "distribute-agent") {
+				// Simula uma lista de agentes/usuários
+				return [
+					{ label: "João Silva", value: "agent_1" },
+					{ label: "Maria Santos", value: "agent_2" },
+					{ label: "Pedro Costa", value: "agent_3" },
+					{ label: "Ana Oliveira", value: "agent_4" },
+					{ label: "Carlos Souza", value: "agent_5" },
+				];
+			}
+
+			// Exemplo para outro tipo de node
+			if (nodeType === "assign-task" && fieldName === "assignee") {
+				return [
+					{ label: "Equipe de Desenvolvimento", value: "team_dev" },
+					{ label: "Equipe de Suporte", value: "team_support" },
+					{ label: "Equipe de Vendas", value: "team_sales" },
+				];
+			}
+
+			// Retorna undefined para campos não dinâmicos ou sem opções
+			return undefined;
+		},
+		onSave: (versionId) => {
+			console.log("Version saved:", versionId);
+		},
+	},
+	decorators: [
+		(Story) => (
+			<Wrapper>
+				<Story />
+			</Wrapper>
+		),
+	],
+	parameters: {
+		docs: {
+			description: {
+				story:
+					"Demonstra o uso de `dynamicEnumOptions` para fornecer opções dinâmicas para campos enum marcados como dinâmicos. " +
+					"Quando um custom node tem um campo enum com `dynamic: true`, o callback é chamado com o nome do campo e o tipo do node. " +
+					"Se o callback retornar opções, elas serão exibidas em um select. Se retornar `undefined` ou array vazio, o campo será renderizado como texto livre.",
+			},
+		},
+	},
 };

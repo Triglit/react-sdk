@@ -2,6 +2,7 @@ import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { StorybookConfig } from "@storybook/react-vite";
+import { loadEnv } from "vite";
 
 /**
  * This function is used to resolve the absolute path of a package.
@@ -17,6 +18,24 @@ const config: StorybookConfig = {
 	framework: {
 		name: getAbsolutePath("@storybook/react-vite"),
 		options: {},
+	},
+	async viteFinal(config, { configType }) {
+		const env = loadEnv(
+			configType === "PRODUCTION" ? "production" : "development",
+			process.cwd(),
+			"",
+		);
+
+		config.define = {
+			...config.define,
+			"import.meta.env": {
+				...env,
+				VITE_TRIGLIT_PUBLISHABLE_KEY:
+					env.VITE_TRIGLIT_PUBLISHABLE_KEY || "",
+			},
+		};
+
+		return config;
 	},
 };
 

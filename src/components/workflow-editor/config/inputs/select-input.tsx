@@ -26,7 +26,6 @@ export function SelectInput({
 	dynamicEnumOptions,
 	nodeType,
 }: ConfigInputProps) {
-	// Check if field is dynamic
 	const isDynamic = definition.dynamic === true;
 
 	// If dynamic, try to get options from callback
@@ -70,6 +69,14 @@ export function SelectInput({
 			<Select
 				value={value}
 				onValueChange={(newValue) => field.onChange(newValue)}
+				items={
+					dynamicOptions
+						? dynamicOptions
+						: options.map((o) => ({
+								label: o,
+								value: o,
+							}))
+				}
 			>
 				<SelectTrigger aria-invalid={error ? "true" : undefined}>
 					<SelectValue />
