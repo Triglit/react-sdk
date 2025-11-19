@@ -45,6 +45,8 @@ interface SchemaProperty {
 	max?: number;
 	minLength?: number;
 	maxLength?: number;
+	minItems?: number;
+	maxItems?: number;
 	pattern?: string;
 	properties?: Record<string, SchemaProperty>;
 	required?: boolean | string[];
@@ -164,13 +166,20 @@ function parseSchemaProperty(
 		field.items = parseSchemaProperty("item", property.items, false);
 
 		// Add array-specific validations
-		if (property.minLength !== undefined) {
+		// Support both minItems/maxItems (JSON Schema standard) and minLength/maxLength (legacy)
+		if (
+			property.minItems !== undefined ||
+			property.minLength !== undefined
+		) {
 			field.validation = field.validation || {};
-			field.validation.minItems = property.minLength;
+			field.validation.minItems = property.minItems ?? property.minLength;
 		}
-		if (property.maxLength !== undefined) {
+		if (
+			property.maxItems !== undefined ||
+			property.maxLength !== undefined
+		) {
 			field.validation = field.validation || {};
-			field.validation.maxItems = property.maxLength;
+			field.validation.maxItems = property.maxItems ?? property.maxLength;
 		}
 	}
 
@@ -390,6 +399,32 @@ export function validateRequiredFields(
 								maxLength: field.validation.maxLength,
 							})
 						: `${field.label} must have at most ${field.validation.maxLength} characters`;
+				}
+			}
+
+			// MinItems/MaxItems for arrays
+			if (field.type === "array" && Array.isArray(value)) {
+				if (
+					field.validation.minItems !== undefined &&
+					value.length < field.validation.minItems
+				) {
+					errors[field.name] = t
+						? t("node.config.fieldMinItems", {
+								field: field.label,
+								minItems: field.validation.minItems,
+							})
+						: `${field.label} must have at least ${field.validation.minItems} items`;
+				}
+				if (
+					field.validation.maxItems !== undefined &&
+					value.length > field.validation.maxItems
+				) {
+					errors[field.name] = t
+						? t("node.config.fieldMaxItems", {
+								field: field.label,
+								maxItems: field.validation.maxItems,
+							})
+						: `${field.label} must have at most ${field.validation.maxItems} items`;
 				}
 			}
 		}

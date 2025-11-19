@@ -1,7 +1,7 @@
 {
 	"name": "@triglit/react-sdk",
 	"type": "module",
-	"version": "0.3.3",
+	"version": "0.4.0",
 	"description": "React SDK for Triglit",
 	"author": "João Pedro <contato@triglit.com>",
 	"license": "MIT",
