@@ -156,7 +156,7 @@ export function ArrayInput({ field, definition, error }: ConfigInputProps) {
 
 	return (
 		<Field>
-			<div className="tg:flex tg:items-center tg:justify-between">
+			<div className="tg:flex tg:w-full tg:items-center tg:justify-between">
 				<div className="tg:flex tg:flex-col tg:gap-1">
 					<FieldLabel>
 						{definition.label}
@@ -199,7 +199,7 @@ export function ArrayInput({ field, definition, error }: ConfigInputProps) {
 				</div>
 			)}
 
-			<div className="tg:space-y-3">
+			<div className="tg:w-full tg:space-y-3">
 				{items.length === 0 ? (
 					<div className="tg:rounded-lg tg:border tg:border-neutral-700 tg:border-dashed tg:bg-neutral-800/30 tg:p-6 tg:text-center">
 						<p className="tg:text-neutral-400 tg:text-sm">

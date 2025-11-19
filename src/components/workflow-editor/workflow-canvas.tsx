@@ -15,6 +15,7 @@ import {
 import { useCallback, useMemo } from "react";
 
 import type { NodeData } from "../../types/index.js";
+import { BranchNode } from "./nodes/branch-node.js";
 import { OneWayLeftNode } from "./nodes/one-way-left.js";
 import { OneWayRightNode } from "./nodes/one-way-right.js";
 import { TwoWayNode } from "./nodes/two-way.js";
@@ -133,6 +134,9 @@ export function WorkflowCanvas({
 					{...props}
 					onConfigClick={handleNodeConfigClick}
 				/>
+			),
+			branch: (props: NodeProps<Node<NodeData>>) => (
+				<BranchNode {...props} onConfigClick={handleNodeConfigClick} />
 			),
 		}),
 		[handleNodeConfigClick],

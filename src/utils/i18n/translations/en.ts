@@ -32,7 +32,11 @@ export const en = {
 	// Node Config Dialog
 	"node.config.title": "Configure Node",
 	"node.config.customName": "Custom Name",
+	"node.config.customNameDescription":
+		"A friendly, human-readable name for this node. This will be displayed in the workflow editor instead of the default node name.",
 	"node.config.customId": "Custom ID",
+	"node.config.customIdDescription":
+		"A unique identifier for this node. This ID is used to reference the node in your code and must be unique across all nodes in the workflow.",
 	"node.config.customNameRequired": "Custom name is required",
 	"node.config.customIdRequired": "Custom ID is required",
 	"node.config.customIdInUse": "This ID is already in use",

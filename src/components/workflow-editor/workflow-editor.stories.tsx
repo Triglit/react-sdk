@@ -30,7 +30,7 @@ const Wrapper = ({ children }: { children: React.ReactNode }) => {
 		<QueryClientProvider client={queryClient}>
 			<TriglitProvider
 				config={{
-					apiKey: "pk_test_example_key_12345",
+					apiKey: "pk_egUsKd0kHxSIA94BSc0Hf5oq64low8NQvs9mFzXBQuXrHfGVAXzu8gVLhFIdMg88",
 				}}
 			>
 				<div className="tg:h-screen tg:w-screen">{children}</div>

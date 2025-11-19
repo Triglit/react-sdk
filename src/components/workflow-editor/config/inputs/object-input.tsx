@@ -141,55 +141,69 @@ export function ObjectInput({ field, definition, error }: ConfigInputProps) {
 					{/* Properties defined in schema */}
 					{properties.length > 0 && (
 						<div className="tg:space-y-4">
-							{properties.map(([propName, propDefinition]) => {
-								// Create nested field path (e.g., "validation.minLength")
-								const nestedFieldName = `${field.name}.${propName}`;
+							{properties
+								.filter(([propName]) => {
+									// Hide nodeId field when inside switch cases (synced from visual connections)
+									// Check if field name contains "cases" and property is "nodeId"
+									if (
+										propName === "nodeId" &&
+										field.name.includes("cases")
+									) {
+										return false;
+									}
+									return true;
+								})
+								.map(([propName, propDefinition]) => {
+									// Create nested field path (e.g., "validation.minLength")
+									const nestedFieldName = `${field.name}.${propName}`;
 
-								// Get component for this field type
-								const InputComponent = configInputRegistry.get(
-									propDefinition.type,
-								);
+									// Get component for this field type
+									const InputComponent =
+										configInputRegistry.get(
+											propDefinition.type,
+										);
 
-								if (!InputComponent) {
+									if (!InputComponent) {
+										return (
+											<div
+												key={propName}
+												className="tg:rounded-lg tg:border tg:border-yellow-700 tg:bg-yellow-900/20 tg:p-3"
+											>
+												<p className="tg:text-sm tg:text-yellow-500">
+													Unsupported type:{" "}
+													<span className="tg:font-mono">
+														{propDefinition.type}
+													</span>
+												</p>
+												<p className="tg:mt-1 tg:text-neutral-400 tg:text-xs">
+													Field:{" "}
+													{propDefinition.label}
+												</p>
+											</div>
+										);
+									}
+
+									const nestedValue = currentValue[propName];
+
 									return (
-										<div
+										<InputComponent
 											key={propName}
-											className="tg:rounded-lg tg:border tg:border-yellow-700 tg:bg-yellow-900/20 tg:p-3"
-										>
-											<p className="tg:text-sm tg:text-yellow-500">
-												Unsupported type:{" "}
-												<span className="tg:font-mono">
-													{propDefinition.type}
-												</span>
-											</p>
-											<p className="tg:mt-1 tg:text-neutral-400 tg:text-xs">
-												Field: {propDefinition.label}
-											</p>
-										</div>
+											field={{
+												value: nestedValue,
+												onChange: (value) =>
+													handleNestedPropertyChange(
+														propName,
+														value,
+													),
+												name: nestedFieldName,
+											}}
+											definition={{
+												...propDefinition,
+												name: nestedFieldName,
+											}}
+										/>
 									);
-								}
-
-								const nestedValue = currentValue[propName];
-
-								return (
-									<InputComponent
-										key={propName}
-										field={{
-											value: nestedValue,
-											onChange: (value) =>
-												handleNestedPropertyChange(
-													propName,
-													value,
-												),
-											name: nestedFieldName,
-										}}
-										definition={{
-											...propDefinition,
-											name: nestedFieldName,
-										}}
-									/>
-								);
-							})}
+								})}
 						</div>
 					)}
 

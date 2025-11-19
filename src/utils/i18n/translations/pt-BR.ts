@@ -35,7 +35,11 @@ export const ptBR: TranslationPackage = {
 	// Node Config Dialog
 	"node.config.title": "Configurar Nó",
 	"node.config.customName": "Nome Personalizado",
+	"node.config.customNameDescription":
+		"Um nome amigável e legível para este nó. Este será exibido no editor de workflow em vez do nome padrão do nó.",
 	"node.config.customId": "ID Personalizado",
+	"node.config.customIdDescription":
+		"Um identificador único para este nó. Este ID é usado para referenciar o nó no seu código e deve ser único em todos os nós do workflow.",
 	"node.config.customNameRequired": "Nome personalizado é obrigatório",
 	"node.config.customIdRequired": "ID personalizado é obrigatório",
 	"node.config.customIdInUse": "Este ID já está em uso",

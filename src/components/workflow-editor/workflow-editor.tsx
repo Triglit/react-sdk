@@ -3,6 +3,7 @@
 import {
 	addEdge,
 	type Edge,
+	type EdgeChange,
 	getOutgoers,
 	type IsValidConnection,
 	type Node,
@@ -47,6 +48,11 @@ import { useNodesRegistry } from "./hooks/use-nodes-registry.js";
 import { useTriggersEditor } from "./hooks/use-triggers.js";
 import { useWorkflowVersionEditor } from "./hooks/use-workflow-version.js";
 import { NodeConfigDialog } from "./node-config-dialog.js";
+import { supportsBranches } from "./utils/node-branches.js";
+import {
+	clearBranchConfigFromEdge,
+	updateBranchConfigFromEdge,
+} from "./utils/sync-branch-config.js";
 import { WorkflowCanvas } from "./workflow-canvas.js";
 import { WorkflowEditorHeader } from "./workflow-editor-header.js";
 import {
@@ -72,11 +78,56 @@ export function WorkflowEditor({
 	className,
 }: WorkflowEditorProps) {
 	const [nodes, setNodes, onNodesChange] = useNodesState<Node<NodeData>>([]);
-	const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+	const [edges, setEdges, onEdgesChangeBase] = useEdgesState<Edge>([]);
 	const { getNodes, getEdges } = useReactFlow();
 	const [selectedVersionId, setSelectedVersionId] = useState<
 		string | undefined
 	>(initialVersionId);
+
+	// Wrapper for onEdgesChange to sync branch config when edges are removed
+	const onEdgesChange = useCallback(
+		(changes: EdgeChange[]) => {
+			// Process edge changes
+			onEdgesChangeBase(changes);
+
+			// Detect removed edges and clear branch config
+			changes.forEach((change) => {
+				if (change.type === "remove") {
+					const removedEdge = edges.find((e) => e.id === change.id);
+					if (removedEdge?.sourceHandle) {
+						const sourceNode = getNodes().find(
+							(n) => n.id === removedEdge.source,
+						);
+						if (sourceNode?.type === "branch") {
+							setNodes((currentNodes) =>
+								currentNodes.map((node) => {
+									if (node.id === removedEdge.source) {
+										const updatedConfig =
+											clearBranchConfigFromEdge(
+												node.data,
+												removedEdge.sourceHandle,
+											);
+										return {
+											...node,
+											data: {
+												...node.data,
+												config: {
+													...node.data.config,
+													...updatedConfig,
+												},
+											},
+										};
+									}
+									return node;
+								}),
+							);
+						}
+					}
+				}
+			});
+		},
+		[edges, getNodes, onEdgesChangeBase, setNodes],
+	);
 
 	const [configState, setConfigState] = useState<{
 		open: boolean;
@@ -189,7 +240,14 @@ export function WorkflowEditor({
 
 			const flowNodes = versionData.nodes.map((node) => {
 				const isTrigger = node.type.startsWith("trigger_");
-				const nodeType = isTrigger ? "oneWayRight" : "twoWay";
+				let nodeType: string;
+				if (isTrigger) {
+					nodeType = "oneWayRight";
+				} else if (supportsBranches(node.type)) {
+					nodeType = "branch";
+				} else {
+					nodeType = "twoWay";
+				}
 
 				let configSchema: Record<string, unknown> = {};
 				if (isTrigger) {
@@ -256,7 +314,41 @@ export function WorkflowEditor({
 				label: edge.label,
 			}));
 
-			setNodes(flowNodes);
+			// Sync branch node configs from edges when loading from backend
+			const nodesWithSyncedConfig = flowNodes.map((node) => {
+				if (supportsBranches(node.data.type)) {
+					// Find all edges from this node
+					const nodeEdges = flowEdges.filter(
+						(e) => e.source === node.id && e.sourceHandle,
+					);
+
+					// Update config based on edges
+					let syncedConfig = {
+						...(node.data.config || {}),
+					} as Record<string, unknown>;
+
+					nodeEdges.forEach((edge) => {
+						if (edge.target && edge.sourceHandle) {
+							syncedConfig = updateBranchConfigFromEdge(
+								node.data,
+								edge.sourceHandle,
+								edge.target,
+							);
+						}
+					});
+
+					return {
+						...node,
+						data: {
+							...node.data,
+							config: syncedConfig,
+						},
+					};
+				}
+				return node;
+			});
+
+			setNodes(nodesWithSyncedConfig);
 			setEdges(flowEdges);
 		}
 	}, [version, triggers, setNodes, setEdges, nodeRegistry?.nodes]);
@@ -270,9 +362,10 @@ export function WorkflowEditor({
 
 			const maxPositionX = 50;
 			const maxPositionY = 50;
+			const nodeType = supportsBranches(type) ? "branch" : "twoWay";
 			const flowNode: Node<NodeData> = {
 				id: crypto.randomUUID(),
-				type: "twoWay",
+				type: nodeType,
 				position: {
 					x: Math.floor(Math.random() * (maxPositionX + 1)),
 					y: Math.floor(Math.random() * (maxPositionY + 1)),
@@ -324,11 +417,13 @@ export function WorkflowEditor({
 	const onConnect: OnConnect = useCallback(
 		(params) => {
 			const targetNode = getNodes().find((n) => n.id === params.target);
+			const sourceNode = getNodes().find((n) => n.id === params.source);
 
 			if (targetNode?.type === "oneWayRight") {
 				return;
 			}
 
+			// Only allow one incoming connection per target node
 			const incomingCount = edges.filter(
 				(e) => e.target === params.target,
 			).length;
@@ -337,17 +432,58 @@ export function WorkflowEditor({
 				return;
 			}
 
-			const outgoingCount = edges.filter(
-				(e) => e.source === params.source,
-			).length;
+			// For branch nodes, allow multiple outgoing connections (one per branch)
+			// For other nodes, only allow one outgoing connection
+			if (sourceNode?.type !== "branch") {
+				const outgoingCount = edges.filter(
+					(e) => e.source === params.source,
+				).length;
 
-			if (outgoingCount >= 1) {
-				return;
+				if (outgoingCount >= 1) {
+					return;
+				}
+			} else {
+				// For branch nodes, check if this specific handle is already connected
+				const handleAlreadyConnected = edges.some(
+					(e) =>
+						e.source === params.source &&
+						e.sourceHandle === params.sourceHandle,
+				);
+
+				if (handleAlreadyConnected) {
+					return;
+				}
 			}
 
 			setEdges((snapshot) => addEdge(params, snapshot));
+
+			// Update branch node config automatically when edge is connected
+			if (sourceNode?.type === "branch" && params.sourceHandle) {
+				setNodes((currentNodes) =>
+					currentNodes.map((node) => {
+						if (node.id === params.source) {
+							const updatedConfig = updateBranchConfigFromEdge(
+								node.data,
+								params.sourceHandle,
+								params.target || "",
+							);
+							return {
+								...node,
+								data: {
+									...node.data,
+									config: {
+										...node.data.config,
+										...updatedConfig,
+									},
+								},
+							};
+						}
+						return node;
+					}),
+				);
+			}
 		},
-		[edges, setEdges, getNodes],
+		[edges, setEdges, getNodes, setNodes],
 	);
 
 	const isValidConnection: IsValidConnection = useCallback(
@@ -355,8 +491,14 @@ export function WorkflowEditor({
 			const nodes = getNodes();
 			const edges = getEdges();
 			const target = nodes.find((node) => node.id === connection.target);
+			const source = nodes.find((node) => node.id === connection.source);
 
 			if (target?.type === "oneWayRight") {
+				return false;
+			}
+
+			// For branch nodes, ensure the sourceHandle is provided
+			if (source?.type === "branch" && !connection.sourceHandle) {
 				return false;
 			}
 
@@ -639,25 +781,77 @@ export function WorkflowEditor({
 			customId: string,
 		) => {
 			setNodes((nodes) =>
-				nodes.map((node) =>
-					node.id === oldNodeId
-						? {
-								...node,
-								id: customId,
-								data: {
-									...node.data,
-									customName,
-									customId,
-									config: {
-										...config,
-										_customName: customName,
-										_customId: customId,
-										_triggerId: node.data._triggerId,
-									},
-								},
+				nodes.map((node) => {
+					if (node.id === oldNodeId) {
+						const nodeType = node.data.type;
+						const currentConfig = (node.data.config ||
+							{}) as Record<string, unknown>;
+						const finalConfig = { ...config };
+
+						// For branch nodes, preserve branch values from edges (they are synced automatically)
+						// Only keep non-branch config values from the form
+						if (supportsBranches(nodeType)) {
+							// Preserve branch-related fields from current config (synced from edges)
+							if (nodeType === "condition") {
+								if (currentConfig.trueBranch) {
+									finalConfig.trueBranch =
+										currentConfig.trueBranch;
+								}
+								if (currentConfig.falseBranch) {
+									finalConfig.falseBranch =
+										currentConfig.falseBranch;
+								}
+							} else if (nodeType === "switch") {
+								if (currentConfig.defaultNode) {
+									finalConfig.defaultNode =
+										currentConfig.defaultNode;
+								}
+								// For cases, we need to merge: keep nodeId from edges, but allow other fields to be edited
+								if (Array.isArray(currentConfig.cases)) {
+									const currentCases =
+										currentConfig.cases as Array<
+											Record<string, unknown>
+										>;
+									const formCases =
+										(config.cases as Array<
+											Record<string, unknown>
+										>) || [];
+									// Merge: use nodeId from current (edges) if exists, otherwise from form
+									finalConfig.cases = currentCases.map(
+										(currentCase, index) => {
+											const formCase =
+												formCases[index] || {};
+											return {
+												...formCase,
+												nodeId:
+													currentCase.nodeId ||
+													formCase.nodeId ||
+													"",
+											};
+										},
+									);
+								}
 							}
-						: node,
-				),
+						}
+
+						return {
+							...node,
+							id: customId,
+							data: {
+								...node.data,
+								customName,
+								customId,
+								config: {
+									...finalConfig,
+									_customName: customName,
+									_customId: customId,
+									_triggerId: node.data._triggerId,
+								},
+							},
+						};
+					}
+					return node;
+				}),
 			);
 
 			if (oldNodeId !== customId) {

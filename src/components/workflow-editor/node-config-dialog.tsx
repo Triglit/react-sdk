@@ -10,7 +10,12 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "../../ui/components/dialog.js";
-import { Field, FieldError, FieldLabel } from "../../ui/components/field.js";
+import {
+	Field,
+	FieldDescription,
+	FieldError,
+	FieldLabel,
+} from "../../ui/components/field.js";
 import { Input } from "../../ui/components/input.js";
 import { ScrollArea } from "../../ui/components/scroll-area.js";
 import { configInputRegistry } from "./config/inputs/index.js";
@@ -109,10 +114,27 @@ export function NodeConfigDialog({
 	const t = useI18n();
 
 	// Parse schema to get field definitions
-	const fields = React.useMemo(
+	const allFields = React.useMemo(
 		() => parseConfigSchema(configSchema),
 		[configSchema],
 	);
+
+	// Filter out branch-related fields that are synced from visual connections
+	const fields = React.useMemo(() => {
+		return allFields.filter((field) => {
+			// For condition nodes, hide trueBranch and falseBranch
+			if (nodeType === "condition") {
+				return (
+					field.name !== "trueBranch" && field.name !== "falseBranch"
+				);
+			}
+			// For switch nodes, hide defaultNode
+			if (nodeType === "switch") {
+				return field.name !== "defaultNode";
+			}
+			return true;
+		});
+	}, [allFields, nodeType]);
 
 	// Create default values from schema and existing config
 	const defaultConfigValues = React.useMemo(
@@ -209,29 +231,40 @@ export function NodeConfigDialog({
 					<div className="tg:space-y-4">
 						<Field>
 							<FieldLabel>
-								{t("node.config.customName")}
+								{t("node.config.customName") || "Custom Name"}
 							</FieldLabel>
 							<Input
 								value={customName}
 								onChange={(e) => setCustomName(e.target.value)}
+								placeholder={nodeName}
 							/>
-							{errors.customName && (
+							{errors.customName ? (
 								<FieldError>{errors.customName}</FieldError>
+							) : (
+								<FieldDescription>
+									{t("node.config.customNameDescription")}
+								</FieldDescription>
 							)}
 						</Field>
 
 						<Field>
-							<FieldLabel>{t("node.config.customId")}</FieldLabel>
+							<FieldLabel>
+								{t("node.config.customId") || "Custom ID"}
+							</FieldLabel>
 							<Input
 								value={customId}
 								onChange={(e) => setCustomId(e.target.value)}
+								placeholder={nodeId}
 							/>
-							{errors.customId && (
+							{errors.customId ? (
 								<FieldError>{errors.customId}</FieldError>
+							) : (
+								<FieldDescription>
+									{t("node.config.customIdDescription")}
+								</FieldDescription>
 							)}
 						</Field>
 
-						{/* Dynamic config fields from schema */}
 						{fields.length > 0 && (
 							<div className="tg:space-y-4">
 								<p className="tg:font-medium tg:text-foreground tg:text-sm">
