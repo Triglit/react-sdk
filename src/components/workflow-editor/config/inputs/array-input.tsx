@@ -19,7 +19,13 @@ import { configInputRegistry } from "./index.js";
  * Allows adding/removing items dynamically in arrays
  * Supports full recursion for arrays of complex objects
  */
-export function ArrayInput({ field, definition, error }: ConfigInputProps) {
+export function ArrayInput({
+	field,
+	definition,
+	error,
+	dynamicEnumOptions,
+	nodeType,
+}: ConfigInputProps) {
 	const [items, setItems] = React.useState<unknown[]>(() => {
 		// Initialize with existing value or empty array
 		if (Array.isArray(field.value)) {
@@ -250,6 +256,8 @@ export function ArrayInput({ field, definition, error }: ConfigInputProps) {
 										required:
 											itemDefinition.required || false,
 									}}
+									dynamicEnumOptions={dynamicEnumOptions}
+									nodeType={nodeType}
 								/>
 							</div>
 						);
