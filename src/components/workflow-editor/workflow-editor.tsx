@@ -40,10 +40,7 @@ import {
 } from "../../ui/components/frame.js";
 import { ScrollArea } from "../../ui/components/scroll-area.js";
 import { cn } from "../../ui/lib/utils.js";
-import {
-	convertTriggerConfigToApi,
-	getTriggerConfigSchemas,
-} from "../../utils/trigger-config-converter.js";
+import { getTriggerConfigSchemas } from "../../utils/trigger-config-converter.js";
 import { useNodesRegistry } from "./hooks/use-nodes-registry.js";
 import { useTriggersEditor } from "./hooks/use-triggers.js";
 import { useWorkflowVersionEditor } from "./hooks/use-workflow-version.js";
@@ -53,6 +50,7 @@ import {
 	clearBranchConfigFromEdge,
 	updateBranchConfigFromEdge,
 } from "./utils/sync-branch-config.js";
+import { analyzeTriggerDiff } from "./utils/trigger-diff.js";
 import { WorkflowCanvas } from "./workflow-canvas.js";
 import { WorkflowEditorHeader } from "./workflow-editor-header.js";
 import {
@@ -582,107 +580,123 @@ export function WorkflowEditor({
 
 		if (!savedVersionId) return;
 
+		// Get existing triggers from API
 		const triggersData = triggers as TriggersListResponse | undefined;
 		const existingTriggers = triggersData?.triggers || [];
-		const existingTriggersMap = new Map<string, Trigger>(
-			existingTriggers.map((t: Trigger) => [t.id, t]),
-		);
 
-		const triggerPromises = triggerNodes
-			.filter((node) => {
-				const triggerId = node.data._triggerId;
-				if (!triggerId && !savedVersionId) {
-					return false;
-				}
-				return true;
-			})
-			.map(async (node) => {
-				const triggerType = node.data.type.replace("trigger_", "");
-				const visualConfig = (node.data.config || {}) as Record<
-					string,
-					unknown
-				>;
-				const triggerId = node.data._triggerId;
+		// Analyze diff to determine what needs to be created, updated, or deleted
+		const triggerDiff = analyzeTriggerDiff(triggerNodes, existingTriggers);
 
-				const apiConfig = convertTriggerConfigToApi(
-					node.data.type,
-					visualConfig,
+		// Create new triggers
+		const createPromises = triggerDiff.toCreate.map(async (nodeData) => {
+			try {
+				const newTrigger = (await createTriggerAsync({
+					workflowVersionId: savedVersionId as string,
+					name: nodeData.triggerName,
+					type: nodeData.triggerType as "schedule" | "webhook",
+					config: nodeData.apiConfig,
+				})) as Trigger;
+
+				// Update node with the new trigger ID
+				setNodes((prevNodes) =>
+					prevNodes.map((n) => {
+						if (n.id === nodeData.node.id) {
+							const visualConfig = (n.data.config ||
+								{}) as Record<string, unknown>;
+							return {
+								...n,
+								data: {
+									...n.data,
+									_triggerId: newTrigger.id,
+									config: {
+										...visualConfig,
+										_triggerId: newTrigger.id,
+									},
+								},
+							};
+						}
+						return n;
+					}),
 				);
-				const triggerName = (node.data.customName ||
-					node.data.name) as string;
 
-				if (triggerId && existingTriggersMap.has(triggerId)) {
-					try {
-						await updateTriggerAsync({
-							triggerId,
-							name: triggerName,
-							config: apiConfig,
-						});
-					} catch (error) {
-						console.error("Error updating trigger:", error);
-						throw error;
-					}
-				} else if (savedVersionId) {
-					try {
-						const newTrigger = (await createTriggerAsync({
-							workflowVersionId: savedVersionId,
-							name: triggerName,
-							type: triggerType as "schedule" | "webhook",
-							config: apiConfig,
-						})) as Trigger;
+				return newTrigger;
+			} catch (error) {
+				console.error("Error creating trigger:", error);
+				throw error;
+			}
+		});
 
-						setNodes((prevNodes) =>
-							prevNodes.map((n) =>
-								n.id === node.id
-									? {
-											...n,
-											data: {
-												...n.data,
-												_triggerId: newTrigger.id,
-												config: {
-													...visualConfig,
-													_triggerId: newTrigger.id,
-												},
-											},
-										}
-									: n,
-							),
-						);
-					} catch (error) {
-						console.error("Error creating trigger:", error);
-						throw error;
-					}
+		// Update existing triggers (only if there are changes)
+		const updatePromises = triggerDiff.toUpdate
+			.filter((item) => item.hasChanges)
+			.map(async ({ trigger, nodeData }) => {
+				try {
+					await updateTriggerAsync({
+						triggerId: trigger.id,
+						name: nodeData.triggerName,
+						config: nodeData.apiConfig,
+					});
+				} catch (error) {
+					console.error("Error updating trigger:", error);
+					throw error;
 				}
 			});
 
-		const currentTriggerIds = new Set(
-			triggerNodes
-				.map((n) => n.data._triggerId)
-				.filter((id): id is string => !!id),
-		);
-
-		const triggersToDelete = existingTriggers.filter(
-			(t: Trigger) => !currentTriggerIds.has(t.id),
-		);
-
-		const deletePromises = triggersToDelete.map(
-			async (trigger: Trigger) => {
-				try {
-					await deleteTriggerAsync(trigger.id);
-				} catch (error) {
-					console.error("Error deleting trigger:", error);
-					throw error;
+		// Ensure _triggerId is set correctly for triggers that don't need updates
+		// but might not have the ID set in the node
+		const syncPromises = triggerDiff.toUpdate
+			.filter((item) => !item.hasChanges)
+			.map(async ({ trigger, nodeData }) => {
+				// If node doesn't have _triggerId set, update it
+				if (!nodeData.triggerId) {
+					setNodes((prevNodes) =>
+						prevNodes.map((n) => {
+							if (n.id === nodeData.node.id) {
+								const visualConfig = (n.data.config ||
+									{}) as Record<string, unknown>;
+								return {
+									...n,
+									data: {
+										...n.data,
+										_triggerId: trigger.id,
+										config: {
+											...visualConfig,
+											_triggerId: trigger.id,
+										},
+									},
+								};
+							}
+							return n;
+						}),
+					);
 				}
-			},
-		);
+			});
+
+		// Delete removed triggers
+		const deletePromises = triggerDiff.toDelete.map(async (trigger) => {
+			try {
+				await deleteTriggerAsync(trigger.id);
+			} catch (error) {
+				console.error("Error deleting trigger:", error);
+				throw error;
+			}
+		});
 
 		try {
-			await Promise.all([...triggerPromises, ...deletePromises]);
+			// Execute all operations in parallel
+			await Promise.all([
+				...createPromises,
+				...updatePromises,
+				...syncPromises,
+				...deletePromises,
+			]);
+
 			if (onSave && savedVersionId) {
 				onSave(savedVersionId);
 			}
 		} catch (error) {
 			console.error("Error syncing triggers:", error);
+			throw error;
 		}
 	}, [
 		nodes,
