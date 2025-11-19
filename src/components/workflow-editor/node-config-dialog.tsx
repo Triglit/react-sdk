@@ -132,6 +132,10 @@ export function NodeConfigDialog({
 			if (nodeType === "switch") {
 				return field.name !== "defaultNode";
 			}
+			// For schedule triggers, hide timezone (always UTC)
+			if (nodeType === "trigger_schedule") {
+				return field.name !== "timezone";
+			}
 			return true;
 		});
 	}, [allFields, nodeType]);

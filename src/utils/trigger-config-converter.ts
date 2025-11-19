@@ -63,7 +63,7 @@ export function convertTriggerConfigToApi(
 	if (type === "schedule") {
 		apiConfig.scheduleConfig = {
 			cron: (config.cronExpression as string) || undefined,
-			timezone: (config.timezone as string) || undefined,
+			timezone: "UTC", // Always use UTC, timezone field is hidden from UI
 		};
 	}
 
@@ -133,12 +133,7 @@ export function getTriggerConfigSchemas(
 						"Cron expression to schedule execution (e.g., 0 0 * * *)",
 					default: "0 0 * * *",
 				},
-				timezone: {
-					type: "string",
-					title: "Timezone",
-					description: "Timezone for execution",
-					default: "UTC",
-				},
+				// timezone is hidden from UI and always set to UTC
 			},
 			required: ["cronExpression"],
 		},
