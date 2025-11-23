@@ -39,8 +39,8 @@ importers:
         specifier: ^3.4.0
         version: 3.4.0
       triglit:
-        specifier: 0.4.3
-        version: 0.4.3
+        specifier: 0.6.0
+        version: 0.6.0
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.3.5
@@ -2346,8 +2346,8 @@ packages:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
 
-  triglit@0.4.3:
-    resolution: {integrity: sha512-4u8ppFL6BMulqoxHaQWR6h/YtINYP8YKSBEI1ctVOyWsRykngv2Zz7b3Cq8Wd8E64IWcVg+/9jk8U/4eg2CaoQ==}
+  triglit@0.6.0:
+    resolution: {integrity: sha512-gUlnpBuu7LfnvJZOkbFHfoPX1wDUr9VmY+nzJEqq1pB6672mcarfElvDTk76RQTGB99S26W7MVGCD5nBbIGFIQ==}
 
   ts-dedent@2.2.0:
     resolution: {integrity: sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==}
@@ -4734,7 +4734,7 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
-  triglit@0.4.3: {}
+  triglit@0.6.0: {}
 
   ts-dedent@2.2.0: {}
 

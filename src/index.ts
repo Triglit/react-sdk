@@ -74,6 +74,7 @@ export {
 export {
 	useCreateWorkflow,
 	useDeleteWorkflow,
+	useToggleWorkflowStatus,
 	useUpdateWorkflow,
 	useWorkflow as useWorkflowQuery,
 	useWorkflows,

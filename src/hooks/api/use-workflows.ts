@@ -194,3 +194,40 @@ export function useDeleteWorkflow() {
 		},
 	});
 }
+
+/**
+ * Hook to toggle workflow status (active/inactive)
+ *
+ * @returns Mutation result for toggling workflow status
+ *
+ * @example
+ * ```tsx
+ * const toggleWorkflowStatus = useToggleWorkflowStatus();
+ *
+ * const handleToggle = () => {
+ *   toggleWorkflowStatus.mutate('wf_123');
+ * };
+ * ```
+ */
+export function useToggleWorkflowStatus() {
+	const { client, callbacks } = useTriglit();
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (workflowId: string) => {
+			return client.workflows.toggleStatus(workflowId);
+		},
+		onSuccess: (data, workflowId) => {
+			queryClient.invalidateQueries({
+				queryKey: ["triglit", "workflows", workflowId],
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["triglit", "workflows"],
+			});
+			callbacks.onWorkflowUpdated?.(data as Workflow);
+		},
+		onError: (error) => {
+			callbacks.onWorkflowUpdateError?.(error);
+		},
+	});
+}

@@ -13,6 +13,7 @@ import type {
 import {
 	useCreateWorkflow,
 	useDeleteWorkflow,
+	useToggleWorkflowStatus,
 	useUpdateWorkflow,
 	useWorkflow as useWorkflowQuery,
 } from "./api/use-workflows.js";
@@ -55,9 +56,17 @@ export interface UseWorkflowReturn {
 	>;
 	deleteWorkflow: UseMutateFunction<void, Error, string, unknown>;
 	deleteWorkflowAsync: UseMutateAsyncFunction<void, Error, string, unknown>;
+	toggleWorkflowStatus: UseMutateFunction<Workflow, Error, string, unknown>;
+	toggleWorkflowStatusAsync: UseMutateAsyncFunction<
+		Workflow,
+		Error,
+		string,
+		unknown
+	>;
 	isCreating: boolean;
 	isUpdating: boolean;
 	isDeleting: boolean;
+	isTogglingStatus: boolean;
 }
 
 /**
@@ -81,6 +90,7 @@ export function useWorkflow(
 	const createMutation = useCreateWorkflow();
 	const updateMutation = useUpdateWorkflow();
 	const deleteMutation = useDeleteWorkflow();
+	const toggleStatusMutation = useToggleWorkflowStatus();
 
 	return {
 		workflow: workflowQuery.data,
@@ -94,8 +104,11 @@ export function useWorkflow(
 		updateWorkflowAsync: updateMutation.mutateAsync,
 		deleteWorkflow: deleteMutation.mutate,
 		deleteWorkflowAsync: deleteMutation.mutateAsync,
+		toggleWorkflowStatus: toggleStatusMutation.mutate,
+		toggleWorkflowStatusAsync: toggleStatusMutation.mutateAsync,
 		isCreating: createMutation.isPending,
 		isUpdating: updateMutation.isPending,
 		isDeleting: deleteMutation.isPending,
+		isTogglingStatus: toggleStatusMutation.isPending,
 	};
 }
